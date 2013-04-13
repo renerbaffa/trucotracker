@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">  
+<html lang="en">  
+  <head>  
+    <title>Chat</title>  
+
+    <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+    <script type="text/javascript" src="jquery.thingbroker-0.3.0.min.js"></script>
+
+    <style type="text/css">
+  .button{width:80px; height:20px; float:left; margin:5px; color:white; background:gray; text-align:center;padding:2px;} 
+  #games p {width:80px; height:20px; float:left; background:pink; margin: 5px;clear:left;}
+</style>
+  </head>  
+<body>
+
+  <div id="games"></div>
+
+  <script>
+    var url = "http://192.168.98.108:8080/thingbroker";
+    var repo = "game";
+
+    $("#games").thing({listen:true, debug:true, eventCallback: updateCallback});
+
+    var games = $.ThingBroker({container:false, url: url}).getThing("?name=" + repo);
+
+    $.each( games, function(i, val){
+       var metadata = val.metadata;
+       $("#games").append( renderGame(val.thingId, metadata.Player1Name, metadata.Player1Score, metadata.Player2Name, metadata.Player2Score, metadata.StartTime));
+       $("#games").append("<br/>");
+    });
+
+
+    function updateCallback(json){
+      window.location.reload();
+    }
+
+    function renderGame(thingId, player1Name, player1Score, player2Name, player2Score, startTime) {
+        var table = $("<table/>").addClass("thing"+thingId);
+        var tr = $("<tr/>");
+        table.append(tr);
+        var player1td = $("<td/>");
+        player1td.append(renderPlayerScore(thingId, 1, player1Name, player1Score));
+        tr.append(player1td);
+
+        tr.append($("<td/>"));
+        tr.append($("<td/>").text("vs"));
+        tr.append($("<td/>"));
+        
+        var player2td = $("<td/>");
+        player2td.append(renderPlayerScore(thingId, 2, player2Name, player2Score));
+        tr.append(player2td);
+
+        table.append($("<tr/>").append($("<td/>").attr("colspan", 6).text("Started At: " + startTime)));
+        return table;
+    }
+
+    function renderPlayerScore(thingId, id, playerName, playerScore) {
+        var mainDiv = $("<div/>").addClass("player" + id);
+        var nameDiv = $("<div/>").addClass("player" + id + "name").text(playerName);
+        mainDiv.append(nameDiv);
+        var scoreDiv = $("<div/>").addClass("player" + id + "score").text(playerScore);
+        mainDiv.append(scoreDiv);
+
+        return mainDiv;
+    }
+
+
+    </script>
+
+</body>
+</html>
